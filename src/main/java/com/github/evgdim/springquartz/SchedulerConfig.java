@@ -16,6 +16,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
@@ -35,7 +36,7 @@ public class SchedulerConfig {
 	}
 
 	@Bean
-	public SchedulerFactoryBean schedulerFactoryBean(JobFactory jobFactory, Trigger simpleJobTrigger)
+	public SchedulerFactoryBean schedulerFactoryBean(JobFactory jobFactory, @Qualifier("cronTrigger")Trigger simpleJobTrigger)
 			throws IOException {
 		SchedulerFactoryBean factory = new SchedulerFactoryBean();
 		factory.setJobFactory(jobFactory);
@@ -55,6 +56,14 @@ public class SchedulerConfig {
 		factoryBean.setRepeatInterval(frequency);
 		factoryBean.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
 		return factoryBean;
+	}
+	
+	@Bean
+	public CronTriggerFactoryBean cronTrigger(@Qualifier("simpleJobDetail") JobDetail jobDetail) {
+		CronTriggerFactoryBean cronBean = new CronTriggerFactoryBean();
+		cronBean.setJobDetail(jobDetail);
+		cronBean.setCronExpression("0/5 * * * * ?");
+		return cronBean;
 	}
 
 	@Bean
